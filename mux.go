@@ -67,7 +67,7 @@ func SubMux() *Mux {
 func (m *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if m.root {
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, internal.PathContextKey{}, r.URL.EscapedPath())
+		ctx = context.WithValue(ctx, internal.Path, r.URL.EscapedPath())
 		r = r.WithContext(ctx)
 	}
 	r = m.router.route(r)

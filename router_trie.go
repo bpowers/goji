@@ -1,4 +1,3 @@
-//go:build !goji_router_simple
 // +build !goji_router_simple
 
 package goji
@@ -8,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"goji.io/pattern"
+	"goji.io/internal"
 )
 
 type router struct {
@@ -71,7 +70,7 @@ func (rt *router) route(r *http.Request) *http.Request {
 	}
 
 	ctx := r.Context()
-	path := pattern.Path(ctx)
+	path := ctx.Value(internal.Path).(string)
 	for path != "" {
 		i := sort.Search(len(tn.children), func(i int) bool {
 			return path[0] <= tn.children[i].prefix[0]

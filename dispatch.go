@@ -10,7 +10,7 @@ type dispatch struct{}
 
 func (d dispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	h := ctx.Value(internal.HandlerContextKey{})
+	h := ctx.Value(internal.Handler)
 	if h == nil {
 		http.NotFound(w, r)
 	} else {
