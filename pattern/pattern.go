@@ -39,6 +39,12 @@ instead of an empty map.
 */
 var AllVariables = allVariables{}
 
+type matches interface {
+	AllVariables() map[Variable]any
+	Path() string
+	Variable(k Variable) string
+}
+
 /*
 Path returns the path that the Goji router uses to perform the PathPrefix
 optimization. While this function does not distinguish between the absence of a
@@ -50,11 +56,23 @@ by net/url.URL.EscapedPath, and not URL.Path) to ensure that Patterns have as
 much discretion as possible (e.g., to behave differently for '/' and '%2f').
 */
 func Path(ctx context.Context) string {
-	pi := ctx.Value(internal.Path)
-	if pi == nil {
-		return ""
+	if pi := ctx.Value(internal.PathContextKey{}); pi != nil {
+		switch p := pi.(type) {
+		case string:
+			return p
+		case *string:
+			return *p
+		}
+
+		return pi.(string)
 	}
-	return pi.(string)
+
+	if mi := ctx.Value(internal.MatchesContextKey{}); mi != nil {
+		m := mi.(matches)
+		return m.Path()
+	}
+
+	return ""
 }
 
 /*
@@ -63,5 +81,5 @@ when performing the PathPrefix optimization. See Path for more information about
 the intended semantics of this path.
 */
 func SetPath(ctx context.Context, path string) context.Context {
-	return context.WithValue(ctx, internal.Path, path)
+	return context.WithValue(ctx, internal.PathContextKey{}, path)
 }

@@ -14,10 +14,10 @@ type match struct {
 }
 
 func (m match) Value(key interface{}) interface{} {
-	switch key {
-	case internal.Pattern:
+	switch key.(type) {
+	case internal.PatternContextKey:
 		return m.p
-	case internal.Handler:
+	case internal.HandlerContextKey:
 		return m.h
 	default:
 		return m.Context.Value(key)

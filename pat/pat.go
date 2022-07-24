@@ -1,8 +1,7 @@
 /*
 Package pat is a URL-matching domain-specific language for Goji.
 
-
-Quick Reference
+# Quick Reference
 
 The following table gives an overview of the language this package accepts. See
 the subsequent sections for a more detailed explanation of what each pattern
@@ -27,8 +26,7 @@ does.
 				/user/carl
 				/user/carl/photos
 
-
-Static Paths
+# Static Paths
 
 Most URL paths may be specified directly: the pattern "/hello" matches URLs with
 precisely that path ("/hello/", for instance, is treated as distinct).
@@ -37,8 +35,7 @@ Note that this package operates on raw (i.e., escaped) paths (see the
 documentation for net/url.URL.EscapedPath). In order to match a character that
 can appear escaped in a URL path, use its percent-encoded form.
 
-
-Named Matches
+# Named Matches
 
 Named matches allow URL paths to contain any value in a particular path segment.
 Such matches are denoted by a leading ":", for example ":name" in the rule
@@ -62,8 +59,7 @@ slightly differently than slashes: the above pattern also matches the path
 "/data.tar.gz", with "ext" getting set to "tar.gz"; and the pattern "/:file"
 matches names with dots in them (like "data.json").
 
-
-Prefix Matches
+# Prefix Matches
 
 Pat can also match prefixes of routes using wildcards. Prefix wildcard routes
 end with "/*", and match just the path segments preceding the asterisk. For
@@ -81,6 +77,8 @@ instance.
 package pat
 
 import (
+	"context"
+	"goji.io/internal"
 	"net/http"
 	"regexp"
 	"sort"
@@ -239,7 +237,22 @@ func (p *Pattern) Match(r *http.Request) *http.Request {
 		}
 	}
 
-	return r.WithContext(&match{ctx, p, scratch})
+	needNewCtx := false
+	var ms *matches
+	if matchesi := ctx.Value(internal.MatchesContextKey{}); matchesi != nil {
+		ms = matchesi.(*matches)
+	} else {
+		ms = new(matches)
+		needNewCtx = true
+	}
+
+	ms.Add(match{p, scratch})
+
+	if needNewCtx {
+		r = r.WithContext(context.WithValue(ctx, internal.MatchesContextKey{}, ms))
+	}
+
+	return r
 }
 
 /*
@@ -286,5 +299,9 @@ variables that have not been set (or which have been invalidly set) are
 considered programmer errors and will trigger a panic.
 */
 func Param(r *http.Request, name string) string {
-	return r.Context().Value(pattern.Variable(name)).(string)
+	if msi := r.Context().Value(internal.MatchesContextKey{}); msi != nil {
+		ms := msi.(*matches)
+		return ms.Variable(pattern.Variable(name))
+	}
+	return ""
 }
