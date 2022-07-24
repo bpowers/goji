@@ -120,7 +120,7 @@ func TestRouter(t *testing.T) {
 		for *mark = 0; *mark < len(TestRoutes); *mark++ {
 			r := rt.route(r)
 			ctx := r.Context()
-			if h := ctx.Value(internal.Handler); h != nil {
+			if h := HandlerFromContext(ctx); h != nil {
 				out = append(out, int(h.(intHandler)))
 			} else {
 				out = append(out, -1)

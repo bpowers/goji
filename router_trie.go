@@ -1,8 +1,10 @@
+//go:build !goji_router_simple
 // +build !goji_router_simple
 
 package goji
 
 import (
+	"context"
 	"net/http"
 	"sort"
 	"strings"
@@ -63,6 +65,12 @@ func (rt *router) add(p Pattern, h http.Handler) {
 	}
 }
 
+func setMatch(ctx context.Context, p Pattern, h http.Handler) context.Context {
+	ctx = context.WithValue(ctx, internal.Pattern, p)
+	ctx = context.WithValue(ctx, internal.Handler, h)
+	return ctx
+}
+
 func (rt *router) route(r *http.Request) *http.Request {
 	tn := &rt.wildcard
 	if tn2, ok := rt.methods[r.Method]; ok {
@@ -83,15 +91,13 @@ func (rt *router) route(r *http.Request) *http.Request {
 		tn = tn.children[i].node
 	}
 	for _, i := range tn.routes {
-		if r2 := rt.routes[i].Match(r); r2 != nil {
-			return r2.WithContext(&match{
-				Context: r2.Context(),
-				p:       rt.routes[i].Pattern,
-				h:       rt.routes[i].Handler,
-			})
+		route := rt.routes[i]
+		if r2 := route.Match(r); r2 != nil {
+			return r2.WithContext(setMatch(r2.Context(), route.Pattern, route.Handler))
 		}
 	}
-	return r.WithContext(&match{Context: ctx})
+	// set an explicit nil to mask previous values that may be in the context
+	return r.WithContext(setMatch(ctx, nil, nil))
 }
 
 // We can be a teensy bit more efficient here: we're maintaining a sorted list,

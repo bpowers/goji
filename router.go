@@ -7,21 +7,28 @@ import (
 	"goji.io/internal"
 )
 
-type match struct {
-	context.Context
-	p Pattern
-	h http.Handler
-}
-
-func (m match) Value(key interface{}) interface{} {
-	switch key {
-	case internal.Pattern:
-		return m.p
-	case internal.Handler:
-		return m.h
-	default:
-		return m.Context.Value(key)
+// PatternFromContext returns the most recently matched Pattern, or nil if no pattern was
+// matched.
+func PatternFromContext(ctx context.Context) Pattern {
+	if pi := ctx.Value(internal.Pattern); pi != nil {
+		if p, ok := pi.(Pattern); ok {
+			return p
+		}
 	}
+	return nil
 }
 
-var _ context.Context = match{}
+// HandlerFromContext returns the handler corresponding to the most recently matched Pattern,
+// or nil if no pattern was matched.
+//
+// The handler returned by this function is the one that will be dispatched to at
+// the end of the middleware stack. If the returned Handler is nil, http.NotFound
+// will be used instead.
+func HandlerFromContext(ctx context.Context) http.Handler {
+	if hi := ctx.Value(internal.Handler); hi != nil {
+		if h, ok := hi.(http.Handler); ok {
+			return h
+		}
+	}
+	return nil
+}

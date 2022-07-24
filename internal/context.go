@@ -7,6 +7,7 @@ var (
 	// Path is the context key used to store the path Goji uses for its
 	// PathPrefix optimization.
 	Path interface{} = ContextKey(0)
+
 	// Pattern is the context key used to store the Pattern that Goji last
 	// matched.
 	Pattern interface{} = ContextKey(1)

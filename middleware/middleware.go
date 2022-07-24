@@ -19,13 +19,7 @@ import (
 Pattern returns the most recently matched Pattern, or nil if no pattern was
 matched.
 */
-func Pattern(ctx context.Context) goji.Pattern {
-	p := ctx.Value(internal.Pattern)
-	if p == nil {
-		return nil
-	}
-	return p.(goji.Pattern)
-}
+var Pattern = goji.PatternFromContext
 
 /*
 SetPattern returns a new context in which the given Pattern is used as the most
@@ -43,13 +37,7 @@ The handler returned by this function is the one that will be dispatched to at
 the end of the middleware stack. If the returned Handler is nil, http.NotFound
 will be used instead.
 */
-func Handler(ctx context.Context) http.Handler {
-	h := ctx.Value(internal.Handler)
-	if h == nil {
-		return nil
-	}
-	return h.(http.Handler)
-}
+var Handler = goji.HandlerFromContext
 
 /*
 SetHandler returns a new context in which the given Handler was most recently
