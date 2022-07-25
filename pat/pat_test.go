@@ -95,15 +95,15 @@ func TestPat(t *testing.T) {
 			t.Errorf("[%q %q] path=%q, expected=%q", test.pat, test.req, path, test.path)
 		}
 
-		vars := ctx.Value(pattern.AllVariables)
+		vars := GetAllVariables(ctx)
 		if (vars != nil) != (test.vars != nil) {
 			t.Errorf("[%q %q] vars=%#v, expected=%#v", test.pat, test.req, vars, test.vars)
 		}
 		if vars == nil {
 			continue
 		}
-		if tvars := vars.(map[pattern.Variable]interface{}); !reflect.DeepEqual(tvars, test.vars) {
-			t.Errorf("[%q %q] vars=%v, expected=%v", test.pat, test.req, tvars, test.vars)
+		if !reflect.DeepEqual(vars, test.vars) {
+			t.Errorf("[%q %q] vars=%v, expected=%v", test.pat, test.req, vars, test.vars)
 		}
 	}
 }

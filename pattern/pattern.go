@@ -25,20 +25,6 @@ type, to context.Context.Value to retrieve the value bound to that name.
 */
 type Variable string
 
-type allVariables struct{}
-
-/*
-AllVariables is a standard value which, when passed to context.Context.Value,
-returns all variable bindings present in the context, with bindings in newer
-contexts overriding values deeper in the stack. The concrete type
-
-	map[Variable]interface{}
-
-is used for this purpose. If no variables are bound, nil should be returned
-instead of an empty map.
-*/
-var AllVariables = allVariables{}
-
 /*
 Path returns the path that the Goji router uses to perform the PathPrefix
 optimization. While this function does not distinguish between the absence of a

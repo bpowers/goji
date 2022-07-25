@@ -19,7 +19,7 @@ func TestExistingContext(t *testing.T) {
 	}
 	ctx := context.Background()
 	ctx = pattern.SetPath(ctx, req.URL.EscapedPath())
-	ctx = context.WithValue(ctx, pattern.AllVariables, map[pattern.Variable]interface{}{
+	ctx = context.WithValue(ctx, "TODO", map[pattern.Variable]interface{}{
 		"hello": "world",
 		"c":     "nope",
 	})
@@ -45,7 +45,7 @@ func TestExistingContext(t *testing.T) {
 	}
 
 	expected["hello"] = "world"
-	all := ctx.Value(pattern.AllVariables).(map[pattern.Variable]interface{})
+	all := GetAllVariables(ctx)
 	if !reflect.DeepEqual(all, expected) {
 		t.Errorf("expected %v, got %v", expected, all)
 	}
